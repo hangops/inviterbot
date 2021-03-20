@@ -1,0 +1,15 @@
+steps:
+  # build the container image
+- name: "gcr.io/cloud-builders/docker"
+  args: ["build", "-t", "gcr.io/hangops-jobbot/inviterbot:latest", "."]
+  # push container image
+- name: "gcr.io/cloud-builders/docker"
+  args: ["push", "gcr.io/hangops-jobbot/inviterbot:latest"]
+  # deploy container image to GKE
+- name: "gcr.io/cloud-builders/gke-deploy"
+  args:
+  - run
+  - --filename=.local/deployment.yaml
+  - --image=gcr.io/hangops-jobbot/inviterbot:latest
+  - --location=us-west2-a
+  - --cluster=hangops-jobbot-cluster

@@ -6,6 +6,7 @@ const args = require('args');
 const hostenv = require('hostenv');
 const dbg = require('debug');
 const slackin = require('../lib');
+const fs = require('fs');
 
 require('dotenv').config();
 
@@ -86,12 +87,19 @@ const flags = args.parse(process.argv, {
 // Required arguments
 const org = args.sub[0] || process.env.SLACK_SUBDOMAIN;
 const token = args.sub[1] || process.env.SLACK_API_TOKEN;
+var blockDomains = process.env.BLOCKDOMAINS_SLACK_LIST || ''
+// Try to read blockdomains in as a file.
+if (blockDomains.startsWith('file://')) {
+  blockDomains = fs.readFileSync(blockDomains.substr(7)).toString()
+}
+
 
 if (flags.help || !org || !token) {
   args.showHelp();
 } else {
   flags.org = org;
   flags.token = token;
+  flags.blockDomains = blockDomains
 }
 
 // Group the reCAPTCHA settings
