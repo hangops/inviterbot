@@ -1,0 +1,103 @@
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "hangops-inviterbot-config-tkm5"
+  namespace: "default"
+  labels:
+    app: "hangops-inviterbot"
+data:
+  BLOCKDOMAINS_SLACK_LIST: "file:///blockdomains.txt"
+  SLACK_CHANNELS: "announcements"
+  SLACK_COC: "https://github.com/hangops/code-of-conduct"
+  SLACK_SUBDOMAIN: "hangops"
+  SLACKIN_INTERVAL: "300000"
+  SLACKIN_PORT: "3000"
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "hangops-inviterbot"
+  namespace: "default"
+  labels:
+    app: "hangops-inviterbot"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: "hangops-inviterbot"
+  template:
+    metadata:
+      labels:
+        app: "hangops-inviterbot"
+    spec:
+      containers:
+      - name: "inviterbot"
+        image: "gcr.io/hangops-jobbot/inviterbot"
+        env:
+        - name: "BLOCKDOMAINS_SLACK_LIST"
+          valueFrom:
+            configMapKeyRef:
+              key: "BLOCKDOMAINS_SLACK_LIST"
+              name: "hangops-inviterbot-config-tkm5"
+        - name: "SLACK_CHANNELS"
+          valueFrom:
+            configMapKeyRef:
+              key: "SLACK_CHANNELS"
+              name: "hangops-inviterbot-config-tkm5"
+        - name: "SLACK_COC"
+          valueFrom:
+            configMapKeyRef:
+              key: "SLACK_COC"
+              name: "hangops-inviterbot-config-tkm5"
+        - name: "SLACK_SUBDOMAIN"
+          valueFrom:
+            configMapKeyRef:
+              key: "SLACK_SUBDOMAIN"
+              name: "hangops-inviterbot-config-tkm5"
+        - name: "SLACKIN_INTERVAL"
+          valueFrom:
+            configMapKeyRef:
+              key: "SLACKIN_INTERVAL"
+              name: "hangops-inviterbot-config-tkm5"
+        - name: "SLACKIN_PORT"
+          valueFrom:
+            configMapKeyRef:
+              key: "SLACKIN_PORT"
+              name: "hangops-inviterbot-config-tkm5"
+        - name: "SLACK_API_TOKEN"
+          valueFrom:
+            secretKeyRef:
+              name: "hangops-slack-api-token"
+              key: "SLACK_API_TOKEN"
+        - name: "GOOGLE_CAPTCHA_SECRET"
+          valueFrom:
+            secretKeyRef:
+              name: "hangops-captcha-config"
+              key: "GOOGLE_CAPTCHA_SECRET"
+        - name: "GOOGLE_CAPTCHA_SITEKEY"
+          valueFrom:
+            secretKeyRef:
+              name: "hangops-captcha-config"
+              key: "GOOGLE_CAPTCHA_SITEKEY"
+
+---
+apiVersion: "autoscaling/v2beta1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  name: "hangops-inviterbot-hpa-jfsl"
+  namespace: "default"
+  labels:
+    app: "hangops-inviterbot"
+spec:
+  scaleTargetRef:
+    kind: "Deployment"
+    name: "hangops-inviterbot"
+    apiVersion: "apps/v1"
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: "Resource"
+    resource:
+      name: "cpu"
+      targetAverageUtilization: 80
