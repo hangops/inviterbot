@@ -83,10 +83,14 @@
         iframe.style.visibility = 'visible'
       }
 
-      // redirect to URL
+      // redirect to URL (with validation to prevent open redirect)
       var redir = 'slackin-redirect:' + id + ':'
       if (redir === e.data.slice(0, redir.length)) {
-        window.location.href = e.data.slice(redir.length) // lgtm [js/client-side-unvalidated-url-redirection]
+        var redirectUrl = e.data.slice(redir.length)
+        // Only allow redirects to slack.com domains
+        if (redirectUrl.match(/^https:\/\/[a-z0-9-]+\.slack\.com\//)) {
+          window.location.href = redirectUrl
+        }
       }
     })
   }
