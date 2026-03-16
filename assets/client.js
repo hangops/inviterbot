@@ -1,7 +1,6 @@
-/* globals data:false, grecaptcha:false, io:false, superagent:false */
+/* globals data:false, grecaptcha:false */
 
 var body = document.body
-var request = superagent
 
 // elements
 var form = body.querySelector('form#invite')
@@ -43,55 +42,67 @@ function submitForm(ev) {
 body.addEventListener('submit', submitForm)
 
 function invite(chan, coc, email, gcaptcha_response_value, fn) {
-  request
-    .post(data.path + 'invite')
-    .send({
+  fetch(data.path + 'invite', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
       'g-recaptcha-response': gcaptcha_response_value,
       coc: coc,
       channel: chan,
       email: email
     })
-    .end(function (res) {
-      if (res && res.response) {
-        res = res.response
-      }
-
-      if (res && res.body && res.body.redirectUrl) {
+  })
+    .then(function (response) {
+      return response.json().then(function (body) {
+        return { status: response.status, body: body }
+      })
+    })
+    .then(function (res) {
+      if (res.body && res.body.redirectUrl) {
         window.setTimeout(function () {
           topLevelRedirect(res.body.redirectUrl)
         }, 1500)
       }
 
-      if (res && res.error) {
+      if (res.status !== 200) {
         return fn(new Error(res.body.msg || 'Server error'))
       }
 
       fn(null, 'Invite sent')
     })
+    .catch(function (err) {
+      fn(new Error('Network error: ' + err.message))
+    })
 }
 
-// use dom element for better cross browser compatibility
-var url = document.createElement('a')
-url.href = window.location
-// realtime updates
-var socket = io({ path: data.path + 'socket.io' })
-socket.on('data', function (users) {
-  for (var i in users) {
-    if (Object.prototype.hasOwnProperty.call(users, i)) {
-      update(i, users[i])
-    }
-  }
-})
-socket.on('total', function (n) {
-  update('total', n)
-})
-socket.on('active', function (n) {
-  update('active', n)
-})
+// polling updates (replaces socket.io real-time updates)
+function pollData() {
+  fetch(data.path + 'data')
+    .then(function (response) {
+      return response.json()
+    })
+    .then(function (users) {
+      if (users.total !== undefined) {
+        update('total', users.total)
+      }
+      if (users.active !== undefined) {
+        update('active', users.active)
+      }
+    })
+    .catch(function (err) {
+      // Silently fail - will retry on next poll
+      console.error('Failed to fetch data:', err)
+    })
+}
+
+// Poll every 30 seconds for user count updates
+setInterval(pollData, 30000)
 
 function update(val, n) {
   var el = document.querySelector('.' + val)
-  if (el && el.textContent !== n) {
+  if (el && el.textContent !== String(n)) {
     el.textContent = n
     anim(el)
   }

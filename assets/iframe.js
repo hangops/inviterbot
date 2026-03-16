@@ -1,4 +1,4 @@
-/* globals io:false, data:false */
+/* globals data:false */
 
 (function () {
   // give up and resort to `target=_blank`
@@ -45,47 +45,46 @@
     }
   }
 
-  // initialize realtime events asynchronously
-  var script = document.createElement('script')
-  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.4/socket.io.slim.min.js'
-  script.addEventListener('load', function () {
-    // use dom element for better cross browser compatibility
-    var url = document.createElement('a')
-    url.href = window.location
-    var socket = io({ path: data.path + 'socket.io' })
-    var count = document.querySelector('.slack-count')
+  // polling updates (replaces socket.io real-time updates)
+  var count = document.querySelector('.slack-count')
+  var anim
 
-    socket.on('data', function (users) {
-      for (var i in users) {
-        if (Object.prototype.hasOwnProperty.call(users, i)) {
-          update(i, users[i])
+  function pollData() {
+    fetch(data.path + 'data')
+      .then(function (response) {
+        return response.json()
+      })
+      .then(function (users) {
+        if (users.total !== undefined) {
+          update('total', users.total)
         }
-      }
-    })
-    socket.on('total', function (n) {
-      update('total', n)
-    })
-    socket.on('active', function (n) {
-      update('active', n)
-    })
+        if (users.active !== undefined) {
+          update('active', users.active)
+        }
+      })
+      .catch(function (err) {
+        // Silently fail - will retry on next poll
+        console.error('Failed to fetch data:', err)
+      })
+  }
 
-    var anim
-    function update(key, n) {
-      if (data[key] !== n) {
-        data[key] = n
-        var str = ''
-        if (data.active) str = data.active + '/'
-        if (data.total) str += data.total
-        if (!str.length) str = '–'
-        if (anim) clearTimeout(anim)
-        count.textContent = str
-        count.classList.add('anim')
-        anim = setTimeout(function () {
-          count.classList.remove('anim')
-        }, 200)
-        refresh()
-      }
+  function update(key, n) {
+    if (data[key] !== n) {
+      data[key] = n
+      var str = ''
+      if (data.active) str = data.active + '/'
+      if (data.total) str += data.total
+      if (!str.length) str = '–'
+      if (anim) clearTimeout(anim)
+      count.textContent = str
+      count.classList.add('anim')
+      anim = setTimeout(function () {
+        count.classList.remove('anim')
+      }, 200)
+      refresh()
     }
-  })
-  document.body.appendChild(script)
+  }
+
+  // Poll every 30 seconds for user count updates
+  setInterval(pollData, 30000)
 }())
