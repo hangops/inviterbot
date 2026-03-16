@@ -4,7 +4,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/hangops-jobbot/inviterbot:$COMMIT_SHA'
+      - 'gcr.io/hangops-jobbot/inviterbot:$SHORT_SHA'
       - '-t'
       - 'gcr.io/hangops-jobbot/inviterbot:latest'
       - '.'
@@ -14,7 +14,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'gcr.io/hangops-jobbot/inviterbot:$COMMIT_SHA'
+      - 'gcr.io/hangops-jobbot/inviterbot:$SHORT_SHA'
     id: 'push-image-sha'
 
   - name: 'gcr.io/cloud-builders/docker'
@@ -31,13 +31,13 @@ steps:
       - 'services'
       - 'update'
       - 'inviterbot'
-      - '--image=gcr.io/hangops-jobbot/inviterbot:$COMMIT_SHA'
+      - '--image=gcr.io/hangops-jobbot/inviterbot:$SHORT_SHA'
       - '--region=us-west1'
       - '--platform=managed'
     id: 'deploy-cloud-run'
 
 images:
-  - 'gcr.io/hangops-jobbot/inviterbot:$COMMIT_SHA'
+  - 'gcr.io/hangops-jobbot/inviterbot:$SHORT_SHA'
   - 'gcr.io/hangops-jobbot/inviterbot:latest'
 
 options:
