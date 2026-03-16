@@ -1,10 +1,17 @@
 {
   "extends": [
-    "stylelint-config-twbs-bootstrap/scss"
+    "stylelint-config-standard-scss"
   ],
   "rules": {
     "no-duplicate-selectors": null,
-    "order/properties-order": null,
-    "selector-no-qualifying-type": null
+    "selector-no-qualifying-type": null,
+    "no-descending-specificity": null,
+    "media-feature-range-notation": null,
+    "scss/dollar-variable-empty-line-before": null,
+    "scss/no-global-function-names": null,
+    "at-rule-empty-line-before": null,
+    "rule-empty-line-before": null,
+    "color-function-notation": null,
+    "alpha-value-notation": null
   }
 }

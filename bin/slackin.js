@@ -3,7 +3,6 @@
 'use strict';
 
 const args = require('args');
-const hostenv = require('hostenv');
 const dbg = require('debug');
 const slackin = require('../lib');
 const fs = require('fs');
@@ -15,11 +14,11 @@ const mainLog = dbg('slackin:main');
 args
   .option(
     ['p', 'port'], 'Port to listen on',
-    process.env.SLACKIN_PORT || hostenv.PORT || 3000,
+    process.env.SLACKIN_PORT || process.env.PORT || 3000,
   )
   .option(
     ['h', 'hostname'], 'Hostname to listen on',
-    process.env.SLACKIN_HOSTNAME || hostenv.HOSTNAME || '0.0.0.0',
+    process.env.SLACKIN_HOSTNAME || process.env.HOSTNAME || '0.0.0.0',
   )
   .option(
     ['c', 'channels'], 'One or more comma-separated channel names to allow single-channel guests',
