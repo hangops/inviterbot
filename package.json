@@ -1,8 +1,8 @@
 {
-  "name": "slackin-extended",
-  "version": "2.2.1",
-  "description": "Public Slack organizations made easy",
-  "repository": "emedvedev/slackin-extended",
+  "name": "inviterbot",
+  "version": "3.0.0",
+  "description": "Modernized Slack invite bot for public communities",
+  "repository": "hangops/inviterbot",
   "license": "MIT",
   "main": "./lib/index.js",
   "bin": {
@@ -17,7 +17,6 @@
   "dependencies": {
     "@slack/web-api": "^7.15.0",
     "args": "^5.0.1",
-    "autoprefixer": "^10.2.5",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -29,18 +28,19 @@
     "helmet": "^8.1.0",
     "micromatch": "^4.0.2",
     "morgan": "^1.10.0",
-    "postcss": "^8.2.8",
-    "postcss-cli": "^8.3.1",
     "pug": "^3.0.2",
-    "sass": "^1.32.8",
     "serve-favicon": "^2.5.0",
     "tinycolor2": "^1.4.2"
   },
   "devDependencies": {
+    "autoprefixer": "^10.2.5",
     "lockfile-lint": "^4.6.2",
     "mocha": "^11.7.5",
     "nock": "^13.0.11",
     "nodemon": "^3.1.14",
+    "postcss": "^8.2.8",
+    "postcss-cli": "^8.3.1",
+    "sass": "^1.32.8",
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^36.0.1",
     "stylelint-config-standard-scss": "^13.1.0",
@@ -54,7 +54,7 @@
     "dev": "nodemon --watch assets/ --watch lib/ --watch scss/ --ext js,scss,svg --exec \"npm run build && npm start\"",
     "lint": "npm run lint:css && npm run lint:js && npm run lint:lockfile",
     "lint:css": "stylelint \"{assets,scss}/*.{css,scss}\"",
-    "lint:js": "xo",
+    "lint:js": "xo --ignore 'assets/**/*.js'",
     "lint:lockfile": "lockfile-lint --allowed-hosts npm --allowed-schemes https: --empty-hostname false --type npm --path package-lock.json",
     "mocha": "mocha --require ./test/setup --exit",
     "test": "npm run build && npm run lint && npm run mocha",
@@ -69,7 +69,17 @@
     "rules": {
       "camelcase": "off",
       "capitalized-comments": "off",
-      "unicorn/prevent-abbreviations": "off"
+      "no-undef": "off",
+      "unicorn/prevent-abbreviations": "off",
+      "unicorn/prefer-module": "off",
+      "unicorn/prefer-node-protocol": "off",
+      "unicorn/prefer-event-target": "off",
+      "n/prefer-global/process": "off",
+      "import-x/extensions": "off",
+      "require-unicode-regexp": "off",
+      "@stylistic/object-curly-spacing": ["error", "never"],
+      "@stylistic/semi": ["error", "always"],
+      "complexity": ["warn", 30]
     }
   }
 }
