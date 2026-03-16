@@ -37,7 +37,7 @@ cloudrun/
 !.env.template
 
 # Build artifacts (will be rebuilt in container)
-assets/*.css
+# CSS files are small, include them all to avoid missing static files
 
 # MacOS
 .DS_Store
