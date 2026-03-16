@@ -1,0 +1,47 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/hangops-jobbot/inviterbot:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/hangops-jobbot/inviterbot:latest'
+      - '.'
+    id: 'build-image'
+
+  # Push the container image to GCR
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/hangops-jobbot/inviterbot:$COMMIT_SHA'
+    id: 'push-image-sha'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/hangops-jobbot/inviterbot:latest'
+    id: 'push-image-latest'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'services'
+      - 'update'
+      - 'inviterbot'
+      - '--image=gcr.io/hangops-jobbot/inviterbot:$COMMIT_SHA'
+      - '--region=us-west1'
+      - '--platform=managed'
+    id: 'deploy-cloud-run'
+
+images:
+  - 'gcr.io/hangops-jobbot/inviterbot:$COMMIT_SHA'
+  - 'gcr.io/hangops-jobbot/inviterbot:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'N1_HIGHCPU_8'
+
+timeout: '1200s'
