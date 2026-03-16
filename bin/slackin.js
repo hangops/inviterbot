@@ -3,9 +3,9 @@
 'use strict';
 
 const args = require('args');
-const hostenv = require('hostenv');
 const dbg = require('debug');
 const slackin = require('../lib');
+const fs = require('fs');
 
 require('dotenv').config();
 
@@ -14,11 +14,11 @@ const mainLog = dbg('slackin:main');
 args
   .option(
     ['p', 'port'], 'Port to listen on',
-    process.env.SLACKIN_PORT || hostenv.PORT || 3000,
+    process.env.SLACKIN_PORT || process.env.PORT || 3000,
   )
   .option(
     ['h', 'hostname'], 'Hostname to listen on',
-    process.env.SLACKIN_HOSTNAME || hostenv.HOSTNAME || '0.0.0.0',
+    process.env.SLACKIN_HOSTNAME || process.env.HOSTNAME || '0.0.0.0',
   )
   .option(
     ['c', 'channels'], 'One or more comma-separated channel names to allow single-channel guests',
@@ -86,12 +86,19 @@ const flags = args.parse(process.argv, {
 // Required arguments
 const org = args.sub[0] || process.env.SLACK_SUBDOMAIN;
 const token = args.sub[1] || process.env.SLACK_API_TOKEN;
+var blockDomains = process.env.BLOCKDOMAINS_SLACK_LIST || ''
+// Try to read blockdomains in as a file.
+if (blockDomains.startsWith('file://')) {
+  blockDomains = fs.readFileSync(blockDomains.substr(7)).toString()
+}
+
 
 if (flags.help || !org || !token) {
   args.showHelp();
 } else {
   flags.org = org;
   flags.token = token;
+  flags.blockDomains = blockDomains
 }
 
 // Group the reCAPTCHA settings
@@ -106,6 +113,8 @@ flags.pageDelay = process.env.SLACKIN_PAGE_DELAY;
 flags.proxy = Boolean(process.env.SLACKIN_PROXY);
 flags.redirectFQDN = process.env.SLACKIN_HTTPS_REDIRECT;
 flags.letsencrypt = process.env.SLACKIN_LETSENCRYPT;
+flags.inviteMode = process.env.SLACK_INVITE_MODE;
+flags.inviteUrl = process.env.SLACK_INVITE_URL;
 
 const { port, hostname } = flags;
 slackin(flags).listen(port, hostname, (err) => {

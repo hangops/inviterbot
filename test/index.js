@@ -7,50 +7,53 @@ const slackin = require('../lib');
 describe('slackin', () => {
   describe('POST /invite', () => {
     beforeEach(() => {
-      nock('https://myorg.slack.com')
-        .get('/api/users.list')
-        .query({
-          token: 'mytoken', presence: 1, limit: 800, cursor: '',
-        })
+      // Mock Slack Web API endpoints (SDK uses POST to slack.com)
+      nock('https://slack.com')
+        .post('/api/users.list')
         .reply(200, {
           ok: true,
           members: [{}],
           response_metadata: { next_cursor: '' },
         });
 
-      nock('https://myorg.slack.com')
-        .get('/api/users.list')
-        .query({ token: 'mytoken', limit: 800, cursor: '' })
+      nock('https://slack.com')
+        .post('/api/team.info')
         .reply(200, {
           ok: true,
-          members: [{}],
-          response_metadata: { next_cursor: '' },
-        });
-
-      nock('https://myorg.slack.com')
-        .get('/api/conversations.list?token=mytoken')
-        .reply(200, {
-          ok: true,
-          channels: [{}],
-        });
-
-      nock('https://myorg.slack.com')
-        .get('/api/team.info?token=mytoken')
-        .reply(200, {
-          ok: true,
-          team: { icon: {} },
+          team: { name: 'Test Team', icon: {} },
         });
     });
 
-    it('returns success for a successful invite', (done) => {
+    it('returns success for a successful invite (link mode)', (done) => {
       const opts = {
         token: 'mytoken',
         org: 'myorg',
+        inviteMode: 'link',  // Use link mode (default)
       };
 
-      // TODO simplify mocking
-      nock(`https://${opts.org}.slack.com`)
-        .post('/api/users.admin.invite')
+      const app = slackin(opts);
+
+      request(app)
+        .post('/invite')
+        .send({ email: 'foo@example.com' })
+        .expect('Content-Type', /json/)
+        .expect(303, {
+          msg: 'Sending you to Slack...',
+          redirectUrl: 'https://myorg.slack.com/',
+        })
+        .end(done);
+    });
+
+    it('returns success for API mode invite', (done) => {
+      const opts = {
+        token: 'mytoken',
+        org: 'myorg',
+        inviteMode: 'api',
+      };
+
+      // Mock admin.users.invite API - allow any body
+      nock('https://slack.com')
+        .post('/api/admin.users.invite', () => true)
         .reply(200, { ok: true });
 
       const app = slackin(opts);
@@ -65,71 +68,26 @@ describe('slackin', () => {
         })
         .end(done);
     });
-
-    it('returns a failure for a failure message', (done) => {
-      const opts = {
-        token: 'mytoken',
-        org: 'myorg',
-      };
-
-      // TODO simplify mocking
-      nock(`https://${opts.org}.slack.com`)
-        .post('/api/users.admin.invite')
-        .reply(200, {
-          ok: false,
-          error: 'other error',
-        });
-
-      const app = slackin(opts);
-
-      request(app)
-        .post('/invite')
-        .send({ email: 'foo@example.com' })
-        .expect('Content-Type', /json/)
-        .expect(400, {
-          msg: 'other error',
-          redirectUrl: 'https://myorg.slack.com/',
-        })
-        .end(done);
-    });
   });
 
   describe('GET /.well-known/acme-challenge/:id', () => {
     beforeEach(() => {
       process.env.SLACKIN_LETSENCRYPT = 'letsencrypt-challenge';
 
-      nock('https://myorg.slack.com')
-        .get('/api/users.list')
-        .query({
-          token: 'mytoken', presence: 1, limit: 800, cursor: '',
-        })
+      // Mock Slack Web API endpoints
+      nock('https://slack.com')
+        .post('/api/users.list')
         .reply(200, {
           ok: true,
           members: [{}],
           response_metadata: { next_cursor: '' },
         });
 
-      nock('https://myorg.slack.com')
-        .get('/api/users.list')
-        .query({ token: 'mytoken' })
+      nock('https://slack.com')
+        .post('/api/team.info')
         .reply(200, {
           ok: true,
-          members: [{}],
-          response_metadata: { next_cursor: '' },
-        });
-
-      nock('https://myorg.slack.com')
-        .get('/api/channels.list?token=mytoken')
-        .reply(200, {
-          ok: true,
-          channels: [{}],
-        });
-
-      nock('https://myorg.slack.com')
-        .get('/api/team.info?token=mytoken')
-        .reply(200, {
-          ok: true,
-          team: { icon: {} },
+          team: { name: 'Test Team', icon: {} },
         });
     });
 

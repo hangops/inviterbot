@@ -317,3 +317,48 @@ footer {
 #h-captcha {
   display: none;
 }
+
+// Dark mode toggle button
+.theme-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  width: auto;
+  height: auto;
+  padding: .8rem;
+  margin: 0;
+  cursor: pointer;
+  opacity: .6;
+  transition: opacity .2s ease-in;
+  z-index: 100;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  svg {
+    display: block;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .sun {
+    display: none;
+  }
+
+  .moon {
+    display: block;
+  }
+}
+
+html.theme-dark .theme-toggle {
+  .sun {
+    display: block;
+  }
+
+  .moon {
+    display: none;
+  }
+}

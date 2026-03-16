@@ -1,0 +1,47 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Documentation
+*.md
+!README.md
+LICENSE
+license.md
+HISTORY.md
+
+# Tests
+test/
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# CI/CD
+.github/
+cloudbuild.yaml
+cloudrun/
+
+# Environment
+.env
+.env.*
+!.env.template
+
+# Build artifacts (will be rebuilt in container)
+# CSS files are small, include them all to avoid missing static files
+
+# MacOS
+.DS_Store
+
+# Misc
+*.log
+.claude/

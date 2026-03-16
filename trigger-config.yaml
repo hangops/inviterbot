@@ -1,0 +1,31 @@
+# Cloud Build Trigger Configuration for inviterbot
+# Apply with: gcloud builds triggers create github --trigger-config=trigger-config.yaml --project=hangops-jobbot
+#
+# Prerequisites:
+# 1. Connect hangops/inviterbot repo at https://console.cloud.google.com/cloud-build/triggers/connect
+# 2. Then run the gcloud command above
+
+name: inviterbot-deploy-main
+description: "Automatically build and deploy inviterbot on push to main branch"
+
+github:
+  owner: hangops
+  name: inviterbot
+  push:
+    branch: "^main$"
+
+filename: cloudbuild.yaml
+
+# Deploy to us-west1
+substitutions:
+  _REGION: us-west1
+  _SERVICE: inviterbot
+
+includedFiles:
+- "**"
+
+ignoredFiles:
+- "README.md"
+- "**.md"
+- ".github/**"
+- "test/**"

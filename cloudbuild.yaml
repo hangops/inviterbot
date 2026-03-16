@@ -1,0 +1,47 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/hangops-jobbot/inviterbot:$BUILD_ID'
+      - '-t'
+      - 'gcr.io/hangops-jobbot/inviterbot:latest'
+      - '.'
+    id: 'build-image'
+
+  # Push the container image to GCR
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/hangops-jobbot/inviterbot:$BUILD_ID'
+    id: 'push-image-build-id'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/hangops-jobbot/inviterbot:latest'
+    id: 'push-image-latest'
+
+  # Deploy to Cloud Run (using latest for simplicity)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'services'
+      - 'update'
+      - 'inviterbot'
+      - '--image=gcr.io/hangops-jobbot/inviterbot:latest'
+      - '--region=us-west1'
+      - '--platform=managed'
+    id: 'deploy-cloud-run'
+
+images:
+  - 'gcr.io/hangops-jobbot/inviterbot:$BUILD_ID'
+  - 'gcr.io/hangops-jobbot/inviterbot:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'N1_HIGHCPU_8'
+
+timeout: '1200s'
