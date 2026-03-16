@@ -1,0 +1,2 @@
+# Browser-compatible ES5 files - intentionally not linted
+assets/*.js

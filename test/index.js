@@ -13,29 +13,29 @@ describe('slackin', () => {
         .reply(200, {
           ok: true,
           members: [{}],
-          response_metadata: { next_cursor: '' },
+          response_metadata: {next_cursor: ''},
         });
 
       nock('https://slack.com')
         .post('/api/team.info')
         .reply(200, {
           ok: true,
-          team: { name: 'Test Team', icon: {} },
+          team: {name: 'Test Team', icon: {}},
         });
     });
 
-    it('returns success for a successful invite (link mode)', (done) => {
+    it('returns success for a successful invite (link mode)', done => {
       const opts = {
         token: 'mytoken',
         org: 'myorg',
-        inviteMode: 'link',  // Use link mode (default)
+        inviteMode: 'link', // Use link mode (default)
       };
 
       const app = slackin(opts);
 
       request(app)
         .post('/invite')
-        .send({ email: 'foo@example.com' })
+        .send({email: 'foo@example.com'})
         .expect('Content-Type', /json/)
         .expect(303, {
           msg: 'Sending you to Slack...',
@@ -44,7 +44,7 @@ describe('slackin', () => {
         .end(done);
     });
 
-    it('returns success for API mode invite', (done) => {
+    it('returns success for API mode invite', done => {
       const opts = {
         token: 'mytoken',
         org: 'myorg',
@@ -54,13 +54,13 @@ describe('slackin', () => {
       // Mock admin.users.invite API - allow any body
       nock('https://slack.com')
         .post('/api/admin.users.invite', () => true)
-        .reply(200, { ok: true });
+        .reply(200, {ok: true});
 
       const app = slackin(opts);
 
       request(app)
         .post('/invite')
-        .send({ email: 'foo@example.com' })
+        .send({email: 'foo@example.com'})
         .expect('Content-Type', /json/)
         .expect(200, {
           msg: 'WOOT. Check your email!',
@@ -80,18 +80,18 @@ describe('slackin', () => {
         .reply(200, {
           ok: true,
           members: [{}],
-          response_metadata: { next_cursor: '' },
+          response_metadata: {next_cursor: ''},
         });
 
       nock('https://slack.com')
         .post('/api/team.info')
         .reply(200, {
           ok: true,
-          team: { name: 'Test Team', icon: {} },
+          team: {name: 'Test Team', icon: {}},
         });
     });
 
-    it('returns the contents of the letsencrypt token', (done) => {
+    it('returns the contents of the letsencrypt token', done => {
       const opts = {
         token: 'mytoken',
         org: 'myorg',

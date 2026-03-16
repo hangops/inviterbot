@@ -18,19 +18,19 @@ describe('slack-invite', () => {
       };
     });
 
-    it('succeeds when ok', (done) => {
+    it('succeeds when ok', done => {
       // Mock the Slack Web API endpoint - allow any body
       nock('https://slack.com')
         .post('/api/admin.users.invite', () => true)
-        .reply(200, { ok: true });
+        .reply(200, {ok: true});
 
-      invite(opts, (err) => {
+      invite(opts, err => {
         assert.strictEqual(err, null);
         done();
       });
     });
 
-    it.skip('passes along an error message', (done) => {
+    it.skip('passes along an error message', done => {
       // Allow any body content, persist to handle retries
       const scope = nock('https://slack.com')
         .post('/api/admin.users.invite', () => true)
@@ -40,8 +40,8 @@ describe('slack-invite', () => {
         })
         .persist();
 
-      invite(opts, (err) => {
-        scope.persist(false);  // Stop persisting
+      invite(opts, err => {
+        scope.persist(false); // Stop persisting
         assert.notStrictEqual(err, null);
         assert.strictEqual(err.message, 'other error');
         done();
@@ -61,8 +61,8 @@ describe('slack-invite', () => {
       };
     });
 
-    it('returns redirect message', (done) => {
-      invite(opts, (err) => {
+    it('returns redirect message', done => {
+      invite(opts, err => {
         assert.notStrictEqual(err, null);
         assert.strictEqual(err.message, 'Sending you to Slack...');
         done();
