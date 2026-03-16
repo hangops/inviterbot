@@ -113,6 +113,8 @@ flags.pageDelay = process.env.SLACKIN_PAGE_DELAY;
 flags.proxy = Boolean(process.env.SLACKIN_PROXY);
 flags.redirectFQDN = process.env.SLACKIN_HTTPS_REDIRECT;
 flags.letsencrypt = process.env.SLACKIN_LETSENCRYPT;
+flags.inviteMode = process.env.SLACK_INVITE_MODE;
+flags.inviteUrl = process.env.SLACK_INVITE_URL;
 
 const { port, hostname } = flags;
 slackin(flags).listen(port, hostname, (err) => {
