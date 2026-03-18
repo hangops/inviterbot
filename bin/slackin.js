@@ -61,6 +61,10 @@ flags.recaptcha = {
 
 // Advanced parameters (env-only)
 flags.pageDelay = process.env.SLACKIN_PAGE_DELAY;
+flags.fetchPresence = Boolean(process.env.SLACKIN_PRESENCE);
+flags.presenceInterval = process.env.SLACKIN_PRESENCE_INTERVAL
+  ? Number(process.env.SLACKIN_PRESENCE_INTERVAL)
+  : undefined;
 flags.proxy = Boolean(process.env.SLACKIN_PROXY);
 flags.redirectFQDN = process.env.SLACKIN_HTTPS_REDIRECT;
 flags.letsencrypt = process.env.SLACKIN_LETSENCRYPT;
