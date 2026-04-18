@@ -44,6 +44,69 @@ describe('slackin', () => {
         .end(done);
     });
 
+    it('silently drops invite for blocked domain (JSON blocklist)', done => {
+      const opts = {
+        token: 'mytoken',
+        org: 'myorg',
+        inviteMode: 'link',
+        blockDomains: '["spam.com","disposable.net"]',
+      };
+
+      const app = slackin(opts);
+
+      request(app)
+        .post('/invite')
+        .send({email: 'attacker@spam.com'})
+        .expect('Content-Type', /json/)
+        .expect(200, {
+          msg: 'WOOT. Check your email!',
+          redirectUrl: 'https://myorg.slack.com/',
+        })
+        .end(done);
+    });
+
+    it('silently drops invite for blocked domain (plain-text blocklist)', done => {
+      const opts = {
+        token: 'mytoken',
+        org: 'myorg',
+        inviteMode: 'link',
+        blockDomains: 'spam.com\ndisposable.net',
+      };
+
+      const app = slackin(opts);
+
+      request(app)
+        .post('/invite')
+        .send({email: 'attacker@spam.com'})
+        .expect('Content-Type', /json/)
+        .expect(200, {
+          msg: 'WOOT. Check your email!',
+          redirectUrl: 'https://myorg.slack.com/',
+        })
+        .end(done);
+    });
+
+    it('allows any non-blocked email when SLACKIN_EMAILS is not set', done => {
+      const opts = {
+        token: 'mytoken',
+        org: 'myorg',
+        inviteMode: 'link',
+        blockDomains: '["spam.com"]',
+      };
+
+      const app = slackin(opts);
+
+      request(app)
+        .post('/invite')
+        .send({email: 'user@gmail.com'})
+        .expect('Content-Type', /json/)
+        .expect(303, {
+          msg: 'Sending you to Slack...',
+          redirectUrl: 'https://myorg.slack.com/',
+        })
+        .end(done);
+    });
+
     it('returns success for API mode invite', done => {
       const opts = {
         token: 'mytoken',
